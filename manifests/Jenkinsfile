@@ -1,0 +1,13 @@
+pipeline {
+  agent { node { label 'k8s' } }
+
+  stages {
+    stage('rollout') {
+      steps {
+        script {
+          sh 'kubectl rollout restart deployment/simpleapp'
+        }
+      }
+    }
+  }
+}

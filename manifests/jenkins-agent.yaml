@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "jenkins-inbound-agent"
+  labels:
+    name: "jenkins-inbound-agent"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+        name: "jenkins-inbound-agent"
+  template:
+    metadata:
+      labels:
+        name: "jenkins-inbound-agent"
+    spec:
+      serviceAccountName: jenkins-agent
+      containers:
+      - name: inbound-agent
+        image: tvminh/simpleapp:jenkins-agent
+        imagePullPolicy: Always
+        env:
+          - name: JENKINS_URL
+            valueFrom:
+              secretKeyRef:
+                name: jenkins-creds
+                key: JENKINS_URL
+          - name: JENKINS_AGENT_NAME
+            valueFrom:
+              secretKeyRef:
+                name: jenkins-creds
+                key: JENKINS_AGENT_NAME
+          - name: JENKINS_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: jenkins-creds
+                key: JENKINS_SECRET
+        livenessProbe:
+          exec:
+            command:
+            - uname
+            - -a
+          initialDelaySeconds: 60
+          timeoutSeconds: 1
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "300Mi"
+          limits:
+            cpu: 1000m
+            memory: 500Mi
