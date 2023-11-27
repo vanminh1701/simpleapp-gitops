@@ -2,20 +2,25 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: simpleapp
+  labels:
+    app: simpleapp
+    version: prod
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: simpleapp
+      version: prod
   template:
     metadata:
       labels:
         app: simpleapp
+        version: prod
     spec:
       containers:
         - name: simpleapp
           imagePullPolicy: Always
-          image: tvminh/simpleapp:latest 
+          image: tvminh/simpleapp:production 
           ports:
             - containerPort: 80
               name: http
@@ -34,5 +39,5 @@ spec:
   selector:
     app: simpleapp
   ports:
-    - port: 3000
+    - port: 80
       targetPort: http

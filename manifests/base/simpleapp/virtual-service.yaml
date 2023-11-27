@@ -1,0 +1,24 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: simpleapp
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - gateway
+  http:
+    - route:
+      - destination:
+          host: simpleapp.dev.svc.cluster.local
+          port:
+            number: 80
+          subset: prod
+        weight: 80
+
+      - destination:
+          host: simpleapp.dev.svc.cluster.local
+          port:
+            number: 80
+          subset: canary
+        weight: 20

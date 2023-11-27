@@ -2,15 +2,20 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: simpleapp-canary
+  labels:
+    app: simpleapp
+    version: canary
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: simpleapp-canary
+      app: simpleapp
+      version: canary
   template:
     metadata:
       labels:
-        app: simpleapp-canary
+        app: simpleapp
+        version: canary
     spec:
       containers:
         - name: simpleapp-canary
@@ -34,5 +39,5 @@ spec:
   selector:
     app: simpleapp-canary
   ports:
-    - port: 3000
+    - port: 80
       targetPort: http
