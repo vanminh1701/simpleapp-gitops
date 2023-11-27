@@ -4,16 +4,22 @@ kind: Kustomization
 resources:
   - ../../base
 
-    #secretGenerator:
-    #  - name: jenkins-creds
-    #    envs:
-    #      - jenkins.env
-    #
-    #
 replicas:
   - name: simpleapp
     count: 1
+  - name: simpleapp-canary
+    count: 1
 
-images:
-  - name: tvminh/simpleapp
-    newTag: production
+patches:
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: simpleapp
+      spec:
+        template:
+          spec:
+            containers:
+              - name: simpleapp
+                image: tvminh/simpleapp:production
+
