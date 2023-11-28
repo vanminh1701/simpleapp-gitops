@@ -8,9 +8,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/vanminh1701/simpleapp-gitops
+    repoURL: https://github.com/vanminh1701/simpleapp-manifests
     targetRevision: master
-    path: manifests/overlays/dev
+    path: overlays/dev
   destination:
     server: https://kubernetes.default.svc
     namespace: dev

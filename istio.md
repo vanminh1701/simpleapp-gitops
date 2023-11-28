@@ -5,7 +5,7 @@ Run the command:
 istioctl install
 ```
 
-# Install kiali UI
+# Install kiali UI, TODO: Prometheus, jaeger
 ```
 kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.20/samples/addons/kiali.yaml
 ```
@@ -13,3 +13,5 @@ kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.20/samp
 ```
 kubectl label namespace dev istio-injection=enabled
 ```
+
+### Research Gateway API to alternate current VS and DR
