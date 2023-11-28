@@ -1,4 +1,5 @@
 pipeline {
+    agent any
     stages {
         stage("prepare"){
             steps {
@@ -19,11 +20,12 @@ pipeline {
             steps {
                 script {
                     withCredentials([
-                        sshUserPrusernamePassword(credentialsId: 'dockerhub', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USER')
+                        usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USER')
                     ]) {
-                        sh 'docker login -u $DOCKER_USER --password $DOCKER_PASSWORD'
-                        sh "cd apps/frontend && docker build -t tvminh/simpleapp:${env.BRANCH_NAME} ."
-                        sh "docker push tvminh/simpleapp:${env.BRANCH_NAME}"
+                        // sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin'
+                        // sh "cd apps/frontend && docker build -t tvminh/simpleapp:${env.BRANCH_NAME} ."
+                        // sh "docker push tvminh/simpleapp:${env.BRANCH_NAME}"
+                        echo "Build docker and push done!"
                     }                            
                 }
             }
@@ -35,15 +37,38 @@ pipeline {
                     when { branch "canary"}
                     steps{
                         script {
-                            echo "Pull the manifest repo and update resources"
+                            withCredentials([
+                                sshUserPrivateKey(credentialsId:'rhel' , keyFileVariable: 'identity', passphraseVariable: '', usernameVariable: 'userName')
+                            ]) {
+                                def remote = [:]
+                                remote.name = "RHEL"
+                                remote.host = "18.143.173.19"
+                                remote.user = userName
+                                remote.identityFile = identity
+                                remote.allowAnyHosts = true
+
+                                sshCommand remote: remote, command: './canary-deployment.sh'
+                            }
                         }
                     }
                 }
+
                 stage('deploy-prod'){
-                    when { branch "master"}
+                    when { branch "production"}
                     steps{
                         script {
-                            echo "Pull the manifest repo and update resources"
+                            withCredentials([
+                                sshUserPrivateKey(credentialsId:'rhel' , keyFileVariable: 'identity', passphraseVariable: '', usernameVariable: 'userName')
+                            ]) {
+                                def remote = [:]
+                                remote.name = "RHEL"
+                                remote.host = "18.143.173.19"
+                                remote.user = userName
+                                remote.identityFile = identity
+                                remote.allowAnyHosts = true
+
+                                sshCommand remote: remote, command: './production-deployment.sh'
+                            }
                         }
                     }
                 }
