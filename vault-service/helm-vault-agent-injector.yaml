@@ -1,0 +1,2 @@
+global:
+  externalVaultAddr: "http://vault-service-entry:8200"
