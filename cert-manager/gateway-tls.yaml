@@ -29,3 +29,12 @@ spec:
       tls:
         mode: SIMPLE
         credentialName: ingress-cert
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - 'tvminh.co'
+      tls:
+        httpsRedirect: true
+      

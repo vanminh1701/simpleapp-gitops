@@ -19,15 +19,11 @@ helm install vault hashicorp/vault --namespace vault --version 0.26.1
 
 Initialize Vault server
 ```
-kubectl exec vault-0 -- vault operator init \
-    -key-shares=1 \
-    -key-threshold=1 \
-    -format=json > cluster-keys.json
+kubectl exec vault-0 -n vault -- sh
+vault operator init
 ```
 Unseal
-```
-kubectl exec vault-0 -- vault operator unseal $(cat cluster-keys.json | jq -r ".unseal_keys_b64[]")
-```
+Unseal vault with 3 / 5 token seal
 
 ### Apply vault agent injector
 Deploy helm vault with `externalVaultAddr`
@@ -60,15 +56,33 @@ spec:
 ```
 
 ## Install VaultOperator to handle secret
-helm install vault-secrets-operator hashicorp/vault-secrets-operator -n vault-secrets-operator-system --create-namespace --values vault-operator-values.yaml
-
-
-vault write auth/demo-auth-mount/role/cloudflare \
+// Enable vault k8s access
+vault auth enable -path kubernetes kubernetes
+// Connect K8s to Vault
+vault write auth/kubernetes/config kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443"
+// Enable secret kv ver 2
+vault secrets enable -path=kvv2 kv-v2
+// Create policy
+```
+  vault policy write dev - <<EOF
+  path "kvv2/*" {
+     capabilities = ["read"]
+  }
+  EOF
+```
+// Create Vault role and connect to K8s service account
+Note: Make sure `cert-manager` existed
+vault write auth/kubernetes/role/cloudflare \
    bound_service_account_names=default \
    bound_service_account_namespaces=cert-manager \
    policies=dev \
    audience=vault \
    ttl=24h
 
-Create vault kv
+// Create vault cloudflare secret
 vault kv put kvv2/cloudflare/config apiToken="CLOUDFLARE_API_TOKEN"
+
+// Install Operator
+helm install vault-secrets-operator hashicorp/vault-secrets-operator -n vault-secrets-operator-system --create-namespace --values vault-operator-values.yaml
+
+

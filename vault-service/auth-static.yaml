@@ -5,7 +5,7 @@ metadata:
   namespace: cert-manager
 spec:
   method: kubernetes
-  mount: demo-auth-mount
+  mount: kubernetes
   kubernetes:
     role: cloudflare
     serviceAccount: default
