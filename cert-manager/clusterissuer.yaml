@@ -1,0 +1,62 @@
+apiVersion: v1
+data:
+  apiKey: Q1FuejVnQXNRY05UaXZ4cHEwS1YxRGZ6dEFXMFpQSzNQZ1hFZUU3eg==
+kind: Secret
+metadata:
+  name: cloudflare-key
+  namespace: cert-manager
+type: Opaque
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    # You must replace this email address with your own.
+    # Let's Encrypt will use this to contact you about expiring
+    # certificates, and issues related to your account.
+    email: tvminh1701@gmail.com
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      # Secret resource that will be used to store the account's private key.
+      name: istio-ca
+    solvers:
+    - dns01:
+        cloudflare:
+          #         email: tvminh1701@gmail.com
+          apiTokenSecretRef:
+            name: cloudflare-key
+            key: apiKey
+      selector:
+        dnsNames:
+        - 'tvminh.co'
+        - '*.tvminh.co'
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt
+spec:
+  acme:
+    # You must replace this email address with your own.
+    # Let's Encrypt will use this to contact you about expiring
+    # certificates, and issues related to your account.
+    email: tvminh1701@gmail.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      # Secret resource that will be used to store the account's private key.
+      name: istio-ca-prod
+    solvers:
+    - dns01:
+        cloudflare:
+          #         email: tvminh1701@gmail.com
+          apiTokenSecretRef:
+            name: cloudflare-key
+            key: apiKey
+      selector:
+        dnsNames:
+        - 'tvminh.co'
+        - '*.tvminh.co'
+
+    

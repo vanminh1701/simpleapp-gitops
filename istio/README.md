@@ -3,6 +3,7 @@ Make sure the kubectl can connect to the cluster
 Run the command:
 ```
 istioctl install
+
 ```
 
 ### Install kiali UI, Prometheus, jaeger
