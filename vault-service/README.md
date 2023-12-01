@@ -38,7 +38,7 @@ helm install vault-injector hashicorp/vault --namespace dev --version 0.26.1 -f 
 ### Define a Kubernetes service account
 Define a service account in K8s and connect to Vault role, so that resource with this service account can access Vault server on specific permission
 
-# Note issue when integration with Istio
+### Note issue when integration with Istio
 https://github.com/hashicorp/vault-k8s/issues/41
 
 Istio sidecar container manage networking of pods, so we need to make sure the injector can access the vault server by config the ExternalService
@@ -58,3 +58,17 @@ spec:
   location: MESH_EXTERNAL
   resolution: DNS
 ```
+
+## Install VaultOperator to handle secret
+helm install vault-secrets-operator hashicorp/vault-secrets-operator -n vault-secrets-operator-system --create-namespace --values vault-operator-values.yaml
+
+
+vault write auth/demo-auth-mount/role/cloudflare \
+   bound_service_account_names=default \
+   bound_service_account_namespaces=cert-manager \
+   policies=dev \
+   audience=vault \
+   ttl=24h
+
+Create vault kv
+vault kv put kvv2/cloudflare/config apiToken="CLOUDFLARE_API_TOKEN"
