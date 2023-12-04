@@ -34,7 +34,4 @@ spec:
         name: http
         protocol: HTTP
       hosts:
-        - 'tvminh.co'
-      tls:
-        httpsRedirect: true
-      
+        - '*'

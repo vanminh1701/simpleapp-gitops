@@ -18,7 +18,13 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - PruneLast=true
+      - ApplyOutOfSyncOnly=true
     automated:
       prune: true
       selfHeal: true
+  ignoreDifferences:
+    - group: networking.istio.io
+      kind: VirtualService
+      jsonPointers:
+        - /spec/http/0
 

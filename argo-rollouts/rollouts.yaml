@@ -1,0 +1,92 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: ro-simpleapp
+  labels:
+    app: ro-simpleapp
+    version: prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ro-simpleapp
+      version: prod
+  template:
+    metadata:
+      labels:
+        app: ro-simpleapp
+        version: prod
+    spec:
+      containers:
+        - name: httpd
+          imagePullPolicy: Always
+          image: tvminh/simpleapp:production
+          ports:
+            - containerPort: 80
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+  revisionHistoryLimit: 2
+  strategy:
+    canary:
+      canaryService: simpleapp-canary.dev.svc.cluster.local
+      stableService: simpleapp.dev.svc.cluster.local
+      trafficRouting:
+        istio:
+          virtualService:
+            name: ro-vs-simpleapp
+            routes:
+              - primary
+      steps:
+        - setWeight: 20
+        - pause:
+            duration: 1m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simpleapp
+spec: 
+  selector:
+    app: ro-simpleapp
+  ports:
+    - port: 80
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simpleapp-canary
+spec: 
+  selector:
+    app: ro-simpleapp
+  ports:
+    - port: 80
+      targetPort: http
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ro-vs-simpleapp
+spec:
+  gateways:
+    - gateway
+  hosts:
+    - '*'
+  http:
+    - name: primary
+      route:
+        - destination:
+            host: simpleapp.dev.svc.cluster.local
+            port:
+              number: 80
+          weight: 100
+        - destination:
+            host: simpleapp-canary.dev.svc.cluster.local
+            port:
+              number: 80
+          weight: 0
