@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- https://github.com/argoproj/argo-rollouts/releases/latest/download/notifications-install.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+  
+secretGenerator:
+  - name: argo-rollouts-notification-secret
+    envs:
+      - .env
+    behavior: create
+
+configMapGenerator:
+  - name: argo-rollouts-notification-configmap
+    literals:
+      - service.slack=$slack-token
+    behavior: merge

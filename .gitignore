@@ -2,3 +2,4 @@
 terraform.tfstate
 *.private
 cluster-keys.json
+.env
